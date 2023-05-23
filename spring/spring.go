@@ -55,12 +55,14 @@ func (sp *Spring) FindSolution() {
 	d := sp.B*sp.B - 4*sp.M*sp.K
 	switch {
 	case d > 0: // When the characteristic polynomial has two real roots.
-		sum := sp.X0
-		sub := 2*sp.M/math.Sqrt(d)*sp.X1 + sp.B/math.Sqrt(d)*sp.X0
-		c1 := (sum + sub) / 2
-		c2 := (sum - sub) / 2
+
+		l1 := (-sp.B + math.Sqrt(d)) / (2 * sp.M)
+		l2 := (-sp.B - math.Sqrt(d)) / (2 * sp.M)
+		c1 := (sp.X1 - l2*sp.X0) / (l1 - l2)
+		c2 := (sp.X1 - l1*sp.X0) / (l2 - l1)
+
 		sp.Solution = func(t float64) float64 {
-			return c1*math.Exp((-sp.B+math.Sqrt(d))/(2*sp.M)*t) + c2*math.Exp((-sp.B-math.Sqrt(d))/(2*sp.M)*t)
+			return c1*math.Exp(l1*t) + c2*math.Exp(l2*t)
 		}
 
 	case d == 0: // When the characteristic polynomial has one real root.
@@ -74,9 +76,9 @@ func (sp *Spring) FindSolution() {
 
 	case d < 0: // When the characteristic polynomial has two complex roots.
 		c1 := sp.X0
-		c2 := (sp.X1*2*sp.M + sp.B*sp.X0) / math.Sqrt(d)
+		c2 := (sp.X1*2*sp.M + sp.B*sp.X0) / math.Sqrt(-d)
 		l := -sp.B / (2 * sp.M)
-		m := math.Sqrt(d) / (2 * sp.M)
+		m := math.Sqrt(-d) / (2 * sp.M)
 
 		sp.Solution = func(t float64) float64 {
 			return c1*math.Exp(l*t)*math.Cos(m*t) + c2*math.Exp(l*t)*math.Sin(m*t)
